@@ -4,9 +4,8 @@
 
 > [!NOTE]
 > This repository supports converting datasets from OpenX format to LeRobot V2.0 dataset format.
-
-> [!WARNING]
-> `2025.02.25`: LeRobot has updated the dataset from v2.0 to v2.1, scripts need to be updated accordingly.
+> 
+> Current script is now compatible with LeRobot V2.1.
 
 ## 🚀 What's New in This Script
 
@@ -86,21 +85,19 @@ pip install -e .
 ## Get started
 
 > [!IMPORTANT]  
-> 1.Before running the following code, modify `consolidate()` function in lerobot.
+> 1.Before running the following code, modify `save_episode()` function in lerobot.
 > ```python
-> def consolidate(self, run_compute_stats: bool = True, keep_image_files: bool = False, stat_kwargs: dict = {}) -> None:
+> def save_episode(self, episode_data: dict | None = None, keep_images: bool | None = False) -> None:
 >     ...
->     if run_compute_stats:
->         self.stop_image_writer()
->         # TODO(aliberts): refactor stats in save_episodes
->         self.meta.stats = compute_stats(self, **stat_kwargs)
+>     # delete images
+>     if not keep_images:
+>         img_dir = self.root / "images"
+>         if img_dir.is_dir():
+>             shutil.rmtree(self.root / "images")
 >     ...
 > ```
-> 2.for `bc_z` dataset, two source codes need to be modified.
+> 2.for `bc_z` dataset, modify `encode_video_frames()` in `lerobot/common/datasets/video_utils.py`.
 > 
-> path: `lerobot/common/datasets/video_utils.py`
-> 
-> method: `encode_video_frames`
 > ```python
 > # add the following content to line 141:
 > vf: str = "pad=ceil(iw/2)*2:ceil(ih/2)*2",
@@ -128,10 +125,8 @@ python openx_rlds.py \
     --raw-dir /path/to/droid/1.0.0 \
     --local-dir /path/to/LEROBOT_DATASET \
     --repo-id your_hf_id \
-    --push-to-hub \
-    --batch-size 16 \
-    --num-workers 8 \
-    --use-videos
+    --use-videos \
+    --push-to-hub
 ```
 
 Execute the script:
